@@ -1,3 +1,10 @@
+/*
+Author: Mohamed Newir
+Date: 22/12/2025
+File: JsonFileManager.cpp
+Description:
+    o implementation of GameJsonFileManager class which saves and load data in .json files
+*/
 
 #include <iostream>
 #include "../INCLUDE/JsonFileManager.hpp"
