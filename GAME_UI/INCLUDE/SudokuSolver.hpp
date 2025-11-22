@@ -9,6 +9,8 @@ Description:
 #ifndef SUDOKU_SOLVER_HPP
 #define SUDOKU_SOLVER_HPP
 
+#include "../INCLUDE/SudokuBoard.hpp"
+
 class SudokuSolver{
 
     public:

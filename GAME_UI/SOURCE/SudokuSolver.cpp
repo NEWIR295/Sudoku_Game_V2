@@ -1,4 +1,4 @@
-gt/*
+/*
 Author: Mohamed Newir
 Date: 22/12/2025
 File: SudokuSolver.cpp
@@ -7,7 +7,6 @@ Description:
 */
 
 #include "../INCLUDE/SudokuSolver.hpp"
-#include "../INCLUDE/SudokuBoard.hpp"
 
 bool SudokuSolver::sudokuSolver(SudokuBoard &board)
 {
