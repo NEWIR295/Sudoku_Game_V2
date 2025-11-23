@@ -31,8 +31,7 @@ bool SudokuGenerator::generatePuzzle(SudokuBoard& board, int level){
         }
     }
 
-    if(SudokuSolver::sudokuSolver(board)){
-        setDifficulty(board, level);
+    if(setDifficulty(board, level)){
         return true;
     } else {
         return false;

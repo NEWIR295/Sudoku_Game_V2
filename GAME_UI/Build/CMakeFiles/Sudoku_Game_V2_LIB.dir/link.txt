@@ -1,0 +1,2 @@
+/usr/bin/ar qc /home/newir529/a7a/d/Sudoku_Game_V2/GAME_UI/lib/libSudoku_Game_V2_LIB.a CMakeFiles/Sudoku_Game_V2_LIB.dir/SOURCE/SudokuGame.cpp.o CMakeFiles/Sudoku_Game_V2_LIB.dir/SOURCE/SudokuBoard.cpp.o CMakeFiles/Sudoku_Game_V2_LIB.dir/SOURCE/SudokuSolver.cpp.o CMakeFiles/Sudoku_Game_V2_LIB.dir/SOURCE/SudokuGenerator.cpp.o CMakeFiles/Sudoku_Game_V2_LIB.dir/SOURCE/JsonFileManager.cpp.o
+/usr/bin/ranlib /home/newir529/a7a/d/Sudoku_Game_V2/GAME_UI/lib/libSudoku_Game_V2_LIB.a

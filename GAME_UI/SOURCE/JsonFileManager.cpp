@@ -9,7 +9,7 @@ Description:
 #include <iostream>
 #include "../INCLUDE/JsonFileManager.hpp"
 
-GameJsonFileManager::GameJsonFileManager(std::string filename = "Default_Puzzle")
+GameJsonFileManager::GameJsonFileManager(std::string filename)
     : filename(filename)
 {
 }
@@ -51,12 +51,6 @@ bool GameJsonFileManager::writeJsonFile(const std::vector<std::vector<int>> &boa
 {
     outputFile.open("../Puzzle/" + filename + ".json");
 
-    if (!outputFile)
-    {
-        std::cerr << "../Puzzle/" + this->filename + ".json doesn't exist" << std::endl;
-        return false;
-    }
-
     if (!outputFile.is_open())
     {
         std::cerr << "../Puzzle/" + this->filename + ".json is corrupted can't be opened" << std::endl;
@@ -71,5 +65,10 @@ bool GameJsonFileManager::writeJsonFile(const std::vector<std::vector<int>> &boa
     std::cout << "Game Saved Successfully" << std::endl;
     
     outputFile.close();
+    return true;
+}
+
+bool GameJsonFileManager::changeFile(std::string filename){
+    this-> filename = filename;
     return true;
 }

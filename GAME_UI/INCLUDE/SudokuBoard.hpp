@@ -24,7 +24,7 @@ public:
     int getCell(int row, int col) const;
     bool setCell(int row, int col, int value);
     bool printGrid(void) const; // for debuging purposes
-
+    std::vector<std::vector<int>> &getBoardData(void);
 private:
     std::vector<std::vector<int>> board;
 };
