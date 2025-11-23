@@ -9,6 +9,8 @@ Description:
 #include "../INCLUDE/SudokuGenerator.hpp"
 #include "../INCLUDE/SudokuSolver.hpp"
 #include <vector>
+#include <algorithm>
+#include <random>
 
 bool SudokuGenerator::generatePuzzle(SudokuBoard& board, int level){
     
@@ -19,13 +21,18 @@ bool SudokuGenerator::generatePuzzle(SudokuBoard& board, int level){
     }
 
     std::vector<int> numbers = {1,2,3,4,5,6,7,8,9};
-
+    
     for(int i = 0; i < 9; i++){
-        std::random_shuffle(numbers.begin(), numbers.end());
+        std::shuffle(numbers.begin(), numbers.end(), std::mt19937(std::random_device()())); // Modern shuffle
         for(int j = 0; j < 9; j++){
             for(int random : numbers){
                 if(board.setCell(i, j, random)){
-                    break;
+
+                    if(SudokuSolver::sudokuSolver(board)){
+                        break;
+                    } else {
+                        board.setCell(i, j, 0); // reset cell
+                    }
                 }
             }
         }
@@ -39,7 +46,7 @@ bool SudokuGenerator::generatePuzzle(SudokuBoard& board, int level){
 }
 
 bool SudokuGenerator::setDifficulty(SudokuBoard& board, int level){
-    int cellsToRemove;
+    int cellsToRemove = 0;
 
     switch(level){
         case 1: // Easy
@@ -51,19 +58,35 @@ bool SudokuGenerator::setDifficulty(SudokuBoard& board, int level){
         case 3: // Hard
             cellsToRemove = 50;
             break;
+        case 4: // Expert
+            cellsToRemove = 60;
+            break;
         default:
             cellsToRemove = 30;
             break;
     }
 
-    while(cellsToRemove > 0){
-        int row = rand() % 9;
-        int col = rand() % 9;
-
-        if(board.getCell(row, col) != 0){
-            board.setCell(row, col, 0);
-            cellsToRemove--;
+    /*
+        we create pair container to store the positions of the 81 cells
+    */
+    std::vector<std::pair<int, int>> positions;
+    for (int row = 0; row < BOARD_SIZE; row++)
+    {
+        for (int col = 0; col < BOARD_SIZE; col++)
+        {
+            positions.push_back({row, col});
         }
+    }
+    /*
+        then we shuffle the vector and delete the first emptyCells number of cells
+        this way we are sure that we will not delete the same cell more than once
+        and we are sure that the cells are random
+        */
+   // std::random_shuffle(positions.begin(), positions.end()); // not allowed in c++17
+    std::shuffle(positions.begin(), positions.end(), std::mt19937(std::random_device()())); // Modern shuffle
+    for (int i = 0; i < cellsToRemove; i++)
+    {
+        board.setCell(positions[i].first, positions[i].second, 0);
     }
 
     return true;
