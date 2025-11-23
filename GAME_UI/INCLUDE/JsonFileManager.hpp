@@ -19,6 +19,7 @@ class GameJsonFileManager
 
 public:
     GameJsonFileManager(std::string filename = "Default_Puzzle");
+    bool changeFile(std::string filename);
     bool readJsonFile(std::vector<std::vector<int>> &boardData);
     bool writeJsonFile(const std::vector<std::vector<int>> &boardData);
 

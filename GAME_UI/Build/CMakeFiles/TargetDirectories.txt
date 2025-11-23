@@ -1,0 +1,4 @@
+/home/newir529/a7a/d/Sudoku_Game_V2/GAME_UI/Build/CMakeFiles/Sudoku_Game_V2_LIB.dir
+/home/newir529/a7a/d/Sudoku_Game_V2/GAME_UI/Build/CMakeFiles/sudoku.dir
+/home/newir529/a7a/d/Sudoku_Game_V2/GAME_UI/Build/CMakeFiles/edit_cache.dir
+/home/newir529/a7a/d/Sudoku_Game_V2/GAME_UI/Build/CMakeFiles/rebuild_cache.dir
