@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file alias="sudokuBoard.qml">res/qml/sudokuBoard.qml</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file alias="save.png">res/icons/save.png</file>
+        <file alias="solve.png">res/icons/solve.png</file>
+        <file alias="new.png">res/icons/new.png</file>
+        <file alias="load.png">res/icons/load.png</file>
+        <file alias="sudoku.png">res/icons/sudoku.png</file>
+        
+        <file alias="mute.png">res/icons/mute.png</file>
+        <file alias="volume.png">res/icons/volume.png</file>
+        
+        <file alias="linkedin.png">res/icons/linkedin.png</file>
+        <file alias="github.png">res/icons/github.png</file>
+        
+    </qresource>
+    <qresource prefix="/gif">
+        <file alias="yes.gif">res/gif/yes.gif</file>
+    </qresource>
+    
+    <qresource prefix="/music">
+        <file alias="music.mp3">res/music/music.mp3</file>
+    </qresource>
+</RCC>
