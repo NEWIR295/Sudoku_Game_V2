@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/sudoku.dir/SOURCE/main.cpp.o -o /home/newir529/a7a/d/Sudoku_Game_V2/GAME_UI/game/sudoku  /home/newir529/a7a/d/Sudoku_Game_V2/GAME_UI/lib/libSudoku_Game_V2_LIB.a 

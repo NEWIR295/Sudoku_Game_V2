@@ -13,10 +13,17 @@ SudokuBoard::SudokuBoard(void) : board(9, std::vector<int>(BOARD_SIZE, 0)) {};
 
 bool SudokuBoard::is_valid(int row, int col, int value) const
 {
+
+    if (board[row][col] != 0)
+    {
+        return false;
+    }
+
     if (value != 0)
     {
 
-        if(value < 1 || value > 9) return false;
+        if (value < 1 || value > 9)
+            return false;
 
         /* check vertical and horizontal lines */
         for (int i = 0; i < BOARD_SIZE; i++)
@@ -31,15 +38,18 @@ bool SudokuBoard::is_valid(int row, int col, int value) const
         int rowBox = row - row % 3;
         int colBox = col - col % 3;
 
-        for(int i = 0; i < 3; i++){
-            for(int j = 0; j < 3; j++){
-                if(board[i + rowBox][j + colBox] == value){
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (board[i + rowBox][j + colBox] == value)
+                {
                     return false;
                 }
             }
         }
-
     }
+
     return true;
 }
 
@@ -89,5 +99,20 @@ bool SudokuBoard::printGrid(void) const // for debuging purposes
 
 std::vector<std::vector<int>> &SudokuBoard::getBoardData(void)
 {
-    return this -> board;
+    return this->board;
+}
+
+bool SudokuBoard::checkComplete(void) const
+{
+    for (int row = 0; row < BOARD_SIZE; row++)
+    {
+        for (int col = 0; col < BOARD_SIZE; col++)
+        {
+            if (board[row][col] == 0)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
