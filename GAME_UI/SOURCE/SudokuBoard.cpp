@@ -14,10 +14,10 @@ SudokuBoard::SudokuBoard(void) : board(9, std::vector<int>(BOARD_SIZE, 0)) {};
 bool SudokuBoard::is_valid(int row, int col, int value) const
 {
 
-    if (board[row][col] != 0)
-    {
-        return false;
-    }
+    // if (board[row][col] != 0)
+    // {
+    //     return false;
+    // }
 
     if (value != 0)
     {

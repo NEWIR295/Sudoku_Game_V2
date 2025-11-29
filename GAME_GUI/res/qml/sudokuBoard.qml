@@ -24,6 +24,7 @@ Rectangle {
             columnSpacing: 1
 
             property var board: sudokuBoard     // receives 9×9 array from C++
+            property bool boardLocked: typeof sudokuBoardLocked === "undefined" ? false : sudokuBoardLocked
 
             Repeater {
                 model: 81
@@ -43,6 +44,9 @@ Rectangle {
                         font.pixelSize: 20
                         maximumLength: 1
                         color: "black"
+                        readOnly: root.boardLocked
+                        focusPolicy: Qt.StrongFocus
+                        cursorVisible: false
                         background: Rectangle {
                             color: "transparent"
                         }

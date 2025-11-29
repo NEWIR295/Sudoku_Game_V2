@@ -6,6 +6,9 @@
 #include <QQmlContext>
 #include <QStatusBar>
 #include <QLabel>
+#include <QDialog>
+#include <QLineEdit>
+#include <QSpinBox>
 #include "../INCLUDE/JsonFileManager.hpp"
 #include "../INCLUDE/SudokuBoard.hpp"
 
@@ -22,6 +25,10 @@ public:
     ~MainWindow();
 
 private:
+    void fillBoard(void);
+    void showBoard(void);
+    void fillShowBoard(void);
+
     QQuickWidget *qmlWidget;
     QMediaPlayer *player;
     QAudioOutput *audioOutput;
@@ -29,7 +36,61 @@ private:
     QStatusBar *bar;
     QLabel *messageLabel;
 
+    QString filename;
+
+    QVector<QVector<int>> boardQ;
     SudokuBoard board;
     GameJsonFileManager fileManager;
+    bool boardLocked;
 };
+
+class saveDialog: public QDialog{
+    Q_OBJECT
+public:
+    saveDialog(QWidget *parent = nullptr);
+
+private:
+    QLabel *info;
+    QPushButton *no;
+    QPushButton *yes;
+    QLineEdit *fileName;
+signals:
+    void yseClicked(const QString& fileName);
+    void noClicked(void);
+};
+
+class newDialog: public QDialog{
+    Q_OBJECT
+public:
+    newDialog(QWidget *parent = nullptr);
+
+private:
+    QLabel *info;
+    QPushButton *cancel;
+    QPushButton *yes;
+    QSpinBox *spinBox;
+
+signals:
+    void yseClicked(int);
+    void exitClicked(void);
+};
+
+class loadDialog: public QDialog{
+    Q_OBJECT
+public:
+    loadDialog(QWidget *parent = nullptr);
+
+private:
+    QLabel *info;
+    QPushButton *select;
+    QPushButton *cancel;
+    QLineEdit *fileName;
+
+signals:
+    void selectClicked(const QString& fileName);
+    void exitClicked(void);
+};
+
+
+
 #endif // MAINWINDOW_H
