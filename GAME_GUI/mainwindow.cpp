@@ -13,11 +13,17 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QDesktopServices>
+#include <QVector>
+#include <vector>
+#include <QScrollArea>
+#include <filesystem>
 
 #include "../INCLUDE/SudokuBoard.hpp"
 #include "../INCLUDE/SudokuGenerator.hpp"
 #include "../INCLUDE/SudokuSolver.hpp"
 #include "../INCLUDE/JsonFileManager.hpp"
+
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,25 +31,11 @@ MainWindow::MainWindow(QWidget *parent)
     , player(new QMediaPlayer(this))
     , audioOutput(new QAudioOutput(this))
     , soundButton(nullptr)
+    , boardLocked(false)
 {
 
     this -> setFixedSize(750, 620);
     this -> setWindowIcon(QIcon(":/icons/sudoku.png"));
-
-    // Example Sudoku board
-    QList<QList<int>> board = {
-        {5,3,0, 0,7,0, 0,0,0},
-        {6,0,0, 1,9,5, 0,0,0},
-        {0,9,8, 0,0,0, 0,6,0},
-
-        {8,0,0, 0,6,0, 0,0,3},
-        {4,0,0, 8,0,3, 0,0,1},
-        {7,0,0, 0,2,0, 0,0,6},
-
-        {0,6,0, 0,0,0, 2,8,0},
-        {0,0,0, 4,1,9, 0,0,5},
-        {0,0,0, 0,8,0, 0,7,9}
-    };
 
     QString statusMessage = "Ready";
 
@@ -77,11 +69,9 @@ MainWindow::MainWindow(QWidget *parent)
     qmlWidget->setFixedSize(500, 500);
     qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
-    // Pass C++ board to QML
-    qmlWidget->rootContext()->setContextProperty("sudokuBoard", QVariant::fromValue(board));
-
-    // Load QML
-    qmlWidget->setSource(QUrl("qrc:/qml/sudokuBoard.qml"));
+    // show board
+    fileManager.readJsonFile(board.getBoardData());
+    this -> fillShowBoard();
 
     // Adjust main window
     QHBoxLayout *contentRow = new QHBoxLayout;
@@ -116,32 +106,126 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addLayout(contentRow);
     layout->addStretch();
 
+    /* status */
+    bar = statusBar();
+    QLabel *statusLabel = new QLabel(tr("Game Status: "), bar);
+    messageLabel = new QLabel(statusMessage, bar);
+    bar->addWidget(statusLabel);
+    bar->addWidget(messageLabel, 1);
+
+
     QAction *newAction = new QAction("New");
     newAction -> setIcon(QIcon(":/icons/new.png"));
     newAction -> setStatusTip("Generate New Game");
-    connect(newAction, &QAction::triggered, this,[](){
+    connect(newAction, &QAction::triggered, this,[this](){
+
         //generate new game function
+        newDialog newGame(this);
+        int level;
+        connect(&newGame, &newDialog::yseClicked, [this, &level](const int value){
+            level = value;
+        });
+        newGame.setModal(true);
+
+        //save game function
+        if(newGame.exec() == QDialog::Accepted){
+            boardLocked = false;
+            SudokuGenerator::generatePuzzle(board, level);
+
+            messageLabel -> setText("New Game");
+            this -> fillShowBoard();
+        }
+
     });
 
     QAction *saveAction = new QAction("Save");
     saveAction -> setIcon(QIcon(":/icons/save.png"));
     saveAction -> setStatusTip("Save Game");
-    connect(saveAction, &QAction::triggered, this,[](){
+    connect(saveAction, &QAction::triggered, this,[this](){
+
+        saveDialog save(this);
+
+        //save.adjustSize();
+        //QPoint centerPos = this->frameGeometry().center() - save.frameGeometry().center();
+        //save.move(centerPos);
+
+        connect(&save, &saveDialog::yseClicked, this, [this](const QString &filename){
+            this -> filename = filename;
+        });
+
+        save.setModal(true);
+
         //save game function
+        if(save.exec() == QDialog::Accepted){
+            fileManager.changeFile(this -> filename.toStdString());
+            fileManager.writeJsonFile(board.getBoardData());
+            messageLabel -> setText("Game Saved");
+        }
     });
 
     QAction *solveAction = new QAction("Solve");
     solveAction -> setStatusTip("Generate a Solution");
     solveAction -> setIcon(QIcon(":/icons/solve.png"));
-    connect(solveAction, &QAction::triggered, this,[](){
+    connect(solveAction, &QAction::triggered, this,[this](){
         //generate solve game function
+        if(SudokuSolver::sudokuSolver(board)){
+            boardLocked = true;
+            messageLabel -> setText("Solution generated");
+            this -> fillShowBoard();
+
+            //new game or exit
+
+            //generate new game function
+            newDialog newGame(this);
+            int level;
+            connect(&newGame, &newDialog::yseClicked, [this, &level](const int value){
+                level = value;
+            });
+
+            // connect(&newGame,&newDialog::exitClicked, this, &QDialog::close);
+
+            newGame.setModal(true);
+
+            //save game function
+            if(newGame.exec() == QDialog::Accepted){
+                boardLocked = false;
+                SudokuGenerator::generatePuzzle(board, level);
+
+                messageLabel -> setText("New Game");
+                this -> fillShowBoard();
+            }
+
+        } else {
+            messageLabel -> setText("Unable to solve current board");
+        }
     });
 
     QAction *loadAction = new QAction("Load");
     loadAction -> setIcon(QIcon(":/icons/load.png"));
     loadAction -> setStatusTip("Load Game");
-    connect(loadAction, &QAction::triggered, this,[](){
+    connect(loadAction, &QAction::triggered, this, [this](){
         //generate load game function
+
+        loadDialog load(this);
+
+        //save.adjustSize();
+        //QPoint centerPos = this->frameGeometry().center() - save.frameGeometry().center();
+        //save.move(centerPos);
+
+        connect(&load, &loadDialog::selectClicked, this, [this](const QString &filename){
+            this -> filename = filename;
+        });
+
+        load.setModal(true);
+
+        //load game function
+        if(load.exec() == QDialog::Accepted){
+            boardLocked = false;
+            fileManager.changeFile(this -> filename.toStdString());
+            fileManager.readJsonFile(board.getBoardData());
+            messageLabel -> setText("Game Loaded");
+            this -> fillShowBoard();
+        }
     });
 
     QToolBar *toolBar = addToolBar("Game ToolBar");
@@ -154,13 +238,6 @@ MainWindow::MainWindow(QWidget *parent)
     toolBar -> addSeparator();
     toolBar -> addAction(loadAction);
     toolBar -> addSeparator();
-
-    /* status */
-    bar = statusBar();
-    QLabel *statusLabel = new QLabel(tr("Game Status: "), bar);
-    messageLabel = new QLabel(statusMessage, bar);
-    bar->addWidget(statusLabel);
-    bar->addWidget(messageLabel, 1);
 
     connect(soundButton, &QPushButton::toggled, this, [this](bool muted){
         audioOutput->setMuted(muted);
@@ -183,6 +260,193 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
+void MainWindow::fillShowBoard(void){
+    this -> fillBoard();
+    this -> showBoard();
+}
+
+void MainWindow::fillBoard(void){
+    boardQ.clear(); // ensure UI always reflects the latest board only
+    const std::vector<std::vector<int>> &boardVector = board.getBoardData();
+    for (const auto &row : boardVector) {
+        boardQ.append(QVector<int>(row.begin(), row.end()));
+    }
+}
+
+void MainWindow::showBoard(void){
+    // Pass C++ board to QML
+    qmlWidget->rootContext()->setContextProperty("sudokuBoard", QVariant::fromValue(boardQ));
+    qmlWidget->rootContext()->setContextProperty("sudokuBoardLocked", boardLocked);
+
+    // Load QML
+    qmlWidget->setSource(QUrl("qrc:/qml/sudokuBoard.qml"));
+}
+
 MainWindow::~MainWindow()
 {
 }
+
+saveDialog::saveDialog(QWidget *parent) : QDialog(parent){
+
+    this->setWindowTitle("Saving");
+    this->setFixedSize(320, 150);
+    this->setWindowIcon(QIcon(":/icons/save.png"));
+
+    this->info = new QLabel("Do you really want to save the game?", this);
+    this->info->setAlignment(Qt::AlignCenter);
+
+    this->fileName = new QLineEdit(this);
+    this->fileName->setPlaceholderText("Enter new game name");
+    this->fileName->setAlignment(Qt::AlignCenter);
+
+    this->yes = new QPushButton("Yes", this);
+    this->no  = new QPushButton("No", this);
+
+    QHBoxLayout *hLayout = new QHBoxLayout();
+    hLayout->addStretch();
+    hLayout->addWidget(yes);
+    hLayout->addSpacing(10);
+    hLayout->addWidget(no);
+    hLayout->addStretch();
+
+    QVBoxLayout *vLayout = new QVBoxLayout();
+    vLayout->addWidget(info);
+    vLayout->addSpacing(10);
+    vLayout->addWidget(fileName);
+    vLayout->addSpacing(15);
+    vLayout->addLayout(hLayout);
+
+    this->setLayout(vLayout);
+
+
+    connect(yes, &QPushButton::clicked, this, [this](){
+        emit yseClicked(this -> fileName -> text());
+        accept();
+    });
+
+    connect(no, &QPushButton::clicked, this, [this](){
+        emit noClicked();
+        reject();
+    });
+}
+
+newDialog::newDialog(QWidget *parent) : QDialog(parent){
+
+    this->setWindowTitle("New Game");
+    this->setFixedSize(320, 150);
+    this->setWindowIcon(QIcon(":/icons/new.png"));
+
+    this->info = new QLabel("Do you really want new game?", this);
+    this->info->setAlignment(Qt::AlignCenter);
+
+    this -> spinBox = new QSpinBox(this);
+    this -> spinBox -> setAlignment(Qt::AlignCenter);
+    this -> spinBox -> setRange(1,4);
+    this -> spinBox -> setValue(1);
+    this -> spinBox -> setPrefix("Level: ");
+
+    this-> yes = new QPushButton("Yes", this);
+    this-> cancel  = new QPushButton("Cancel", this);
+
+    QHBoxLayout *hLayout = new QHBoxLayout();
+    hLayout->addStretch();
+    hLayout->addWidget(yes);
+    hLayout->addSpacing(10);
+    hLayout->addWidget(cancel);
+    hLayout->addStretch();
+
+    QVBoxLayout *vLayout = new QVBoxLayout();
+    vLayout->addWidget(info);
+    vLayout->addSpacing(10);
+    vLayout->addWidget(spinBox);
+    vLayout->addSpacing(15);
+    vLayout->addLayout(hLayout);
+
+    this->setLayout(vLayout);
+
+
+    connect(yes, &QPushButton::clicked, this, [this](){
+        emit yseClicked(spinBox->value());
+        accept();
+    });
+
+    connect(cancel, &QPushButton::clicked, this, [this](){
+        emit exitClicked();
+        reject();
+    });
+}
+
+loadDialog::loadDialog(QWidget *parent) : QDialog(parent){
+
+    // ---------------- Window setup ----------------
+    setWindowTitle("Load Game");
+    setFixedSize(320, 250);  // slightly taller for file list
+    setWindowIcon(QIcon(":/icons/load.png"));
+
+    // ---------------- Info label ----------------
+    info = new QLabel("Do you really want to load existing game?", this);
+    info->setAlignment(Qt::AlignCenter);
+
+    // ---------------- File list (scrollable) ----------------
+    QWidget *filesContainer = new QWidget(this);        // container for labels
+    QVBoxLayout *filesLayout = new QVBoxLayout(filesContainer);
+
+    for (const auto &file : std::filesystem::directory_iterator("../Puzzle/"))
+    {
+        if (file.path().extension() == ".json")
+        {
+            auto *label = new QLabel(QString::fromStdString(file.path().filename().stem().string()), this);
+            label->setAlignment(Qt::AlignCenter);
+            filesLayout->addWidget(label);
+        }
+    }
+
+    filesLayout->addStretch();  // push files to top
+
+    QScrollArea *scrollArea = new QScrollArea(this);   // optional scroll if many files
+    scrollArea->setWidget(filesContainer);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFixedHeight(80);  // adjust height as needed
+    scrollArea->setFrameShape(QFrame::NoFrame);
+
+    // ---------------- File name input ----------------
+    fileName = new QLineEdit(this);
+    fileName->setPlaceholderText("Enter existing game name");
+    fileName->setAlignment(Qt::AlignCenter);
+
+    // ---------------- Buttons ----------------
+    select = new QPushButton("Yes", this);
+    cancel = new QPushButton("Cancel", this);
+
+    QHBoxLayout *buttonsLayout = new QHBoxLayout();
+    buttonsLayout->addStretch();
+    buttonsLayout->addWidget(select);
+    buttonsLayout->addSpacing(10);
+    buttonsLayout->addWidget(cancel);
+    buttonsLayout->addStretch();
+
+    // ---------------- Main layout ----------------
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->addWidget(info);
+    mainLayout->addSpacing(10);
+    mainLayout->addWidget(scrollArea);
+    mainLayout->addSpacing(10);
+    mainLayout->addWidget(fileName);
+    mainLayout->addSpacing(15);
+    mainLayout->addLayout(buttonsLayout);
+
+    setLayout(mainLayout);
+
+    // ---------------- Signals ----------------
+    connect(select, &QPushButton::clicked, this, [this]() {
+        emit selectClicked(fileName->text());
+        accept();
+    });
+
+    connect(cancel, &QPushButton::clicked, this, [this]() {
+        emit exitClicked();
+        reject();
+    });
+}
+
+
