@@ -6,5 +6,6 @@
     "python.analysis.extraPaths": [
         "/opt/ros/jazzy/lib/python3.12/site-packages"
     ],
-    "github.copilot.chat.codeGeneration.useInstructionFiles": true
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+    "cmake.sourceDirectory": "/home/newir529/Sudoku_Game_V2/GAME_GUI"
 }
