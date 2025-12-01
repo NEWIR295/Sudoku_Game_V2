@@ -267,9 +267,11 @@ void MainWindow::fillShowBoard(void){
 
 void MainWindow::fillBoard(void){
     boardQ.clear(); // ensure UI always reflects the latest board only
+    originalBoardQ.clear(); // Store original puzzle state
     const std::vector<std::vector<int>> &boardVector = board.getBoardData();
     for (const auto &row : boardVector) {
         boardQ.append(QVector<int>(row.begin(), row.end()));
+        originalBoardQ.append(QVector<int>(row.begin(), row.end())); // Save original state
     }
 }
 
@@ -277,6 +279,7 @@ void MainWindow::showBoard(void){
     // Pass C++ board to QML
     qmlWidget->rootContext()->setContextProperty("sudokuBoard", QVariant::fromValue(boardQ));
     qmlWidget->rootContext()->setContextProperty("sudokuBoardLocked", boardLocked);
+    qmlWidget->rootContext()->setContextProperty("mainWindow", this);
 
     // Load QML
     qmlWidget->setSource(QUrl("qrc:/qml/sudokuBoard.qml"));
@@ -284,6 +287,58 @@ void MainWindow::showBoard(void){
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::updateCellValue(int row, int col, int value)
+{
+    // Check if this cell was pre-filled in the original puzzle
+    if (originalBoardQ[row][col] != 0) {
+        messageLabel->setText(QString("Cell [%1,%2] is pre-filled and cannot be edited").arg(row).arg(col));
+        // Revert the QML board to match the actual board
+        boardQ[row][col] = board.getCell(row, col);
+        qmlWidget->rootContext()->setContextProperty("sudokuBoard", QVariant::fromValue(boardQ));
+        return; // Exit early - don't allow editing pre-filled cells
+    }
+
+    // Update the C++ board
+    if (board.setCell(row, col, value)) {
+        // Update the QML board
+        boardQ[row][col] = value;
+        // Refresh the QML Board
+        qmlWidget->rootContext()->setContextProperty("sudokuBoard", QVariant::fromValue(boardQ));
+        
+        // Update status message
+        messageLabel->setText(QString("Cell [%1,%2] = %3").arg(row).arg(col).arg(value));
+        
+        // Check if puzzle is complete
+        if (board.checkComplete()) {
+            messageLabel->setText("Congratulations! Puzzle solved!");
+
+            //generate new game function
+            newDialog newGame(this);
+            int level;
+            connect(&newGame, &newDialog::yseClicked, [this, &level](const int value){
+                level = value;
+            });
+            newGame.setModal(true);
+
+            //save game function
+            if(newGame.exec() == QDialog::Accepted){
+                boardLocked = false;
+                SudokuGenerator::generatePuzzle(board, level);
+
+                messageLabel -> setText("New Game");
+                this -> fillShowBoard();
+            }
+
+        }
+    } else {
+        // Invalid move
+        messageLabel->setText(QString("Invalid value %1 at [%2,%3]").arg(value).arg(row).arg(col));
+        // Revert the QML board to match the actual board
+        boardQ[row][col] = board.getCell(row, col);
+        qmlWidget->rootContext()->setContextProperty("sudokuBoard", QVariant::fromValue(boardQ));
+    }
 }
 
 saveDialog::saveDialog(QWidget *parent) : QDialog(parent){

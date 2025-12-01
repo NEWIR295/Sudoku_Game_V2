@@ -24,6 +24,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void updateCellValue(int row, int col, int value);
+
 private:
     void fillBoard(void);
     void showBoard(void);
@@ -39,6 +42,7 @@ private:
     QString filename;
 
     QVector<QVector<int>> boardQ;
+    QVector<QVector<int>> originalBoardQ;  // Store original puzzle state (pre-filled cells)
     SudokuBoard board;
     GameJsonFileManager fileManager;
     bool boardLocked;
