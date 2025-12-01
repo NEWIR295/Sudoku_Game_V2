@@ -33,6 +33,7 @@ This is a Graphical User Interface Application implementation using **Qt** of th
 - Demonstrate separation of concerns and proper software architecture.
 
 ## Functional Requirements
+- Build a static library for sudoku main function to be used by the GUI app using CMake
 - Display a 9×9 Sudoku Grid using QML format.
 - Display game using a Qt based application.
 - Validate user inputs (row, column, value).
@@ -50,7 +51,79 @@ This is a Graphical User Interface Application implementation using **Qt** of th
 ## File Structure
 
 ```
-
+Sudoku_Game_V2/
+├── Dockerfile                      # Docker configuration for building/running the project
+├── sudoku.bash                     # Bash script to launch the game
+├── LICENSE                         # License file
+├── README.md                       # Project documentation (you are reading it!)
+├── Images/                    
+│   └──  SudokuGame.png             # Game image
+├── Video/    
+├── GAME_GUI/                       # Qt6-based graphical version (with animations & sound)
+│   ├── CMakeLists.txt              # CMake build configuration
+│   ├── res.qrc                     # Qt resource file
+│   ├── main.cpp                    # GUI entry point
+│   ├── mainwindow.cpp
+│   ├── mainwindow.h
+│   ├── mainwindow.ui               # Qt Designer form
+│   ├── build/                      # Generated build directory (CMake)
+│   ├── game/
+│   │   ├── Sudoku                  # Compiled GUI executable
+│   │   └── sudoku.png
+│   ├── INCLUDE/                    # Header files
+│   │   ├── JsonFileManager.hpp
+│   │   ├── SudokuBoard.hpp
+│   │   ├── SudokuGenerator.hpp
+│   │   └── SudokuSolver.hpp
+│   ├── lib/
+│   │   └── libSudoku_Game_V2_LIB.a # Static library with core logic
+│   ├── Puzzle/                     # JSON puzzle files
+│   │   ├── Default_Puzzle.json
+│   │   ├── test.json
+│   │   ├── test2.json
+│   │   ├── test3.json
+│   │   ├── test5.json
+│   │   └── test6.json
+│   ├── res/
+│   │   ├── gif/
+│   │   │   └── yes.gif
+│   │   ├── icons/                  # UI icons
+│   │   │   ├── github.png
+│   │   │   ├── linkedin.png
+│   │   │   ├── load.png
+│   │   │   │   ├── mute.png
+│   │   │   ├── new.png
+│   │   │   ├── save.png
+│   │   │   ├── solve.png
+│   │   │   ├── sudoku.png
+│   │   │   └── volume.png
+│   │   ├── music/
+│   │   │   └── music.mp3
+│   │   └── qml/
+│   │       └── sudokuBoard.qml     # QML component for animated board                  
+│
+└── GAME_UI/                        # Lightweight terminal/console version
+    ├── CMakeLists.txt              # CMake build configuration
+    ├── Build/                      # Generated build directory (CMake)
+    ├── game/
+    │   └── sudoku                  # Compiled console executable
+    ├── INCLUDE/
+    │   ├── JsonFileManager.hpp
+    │   ├── SudokuBoard.hpp
+    │   ├── SudokuGame.hpp
+    │   ├── SudokuGenerator.hpp
+    │   └── SudokuSolver.hpp
+    ├── lib/                        
+    ├── Puzzle/
+    │   ├── Default_Puzzle.json
+    │   └── test.json
+    └── SOURCE/
+        ├── main.cpp
+        ├── JsonFileManager.cpp
+        ├── SudokuBoard.cpp
+        ├── SudokuGame.cpp
+        ├── SudokuGenerator.cpp
+        └── SudokuSolver.cpp
 ```
 
 ## Demo

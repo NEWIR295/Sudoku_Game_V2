@@ -53,6 +53,33 @@ Rectangle {
                         text: root.board[Math.floor(index / 9)][index % 9] === 0
                               ? ""
                               : root.board[Math.floor(index / 9)][index % 9]
+                        
+                        property int row: Math.floor(index / 9)
+                        property int col: index % 9
+                        
+                        function handleEnterKey() {
+                            var value = parseInt(cell.text);
+                            if (!isNaN(value) && value >= 1 && value <= 9) {
+                                if (typeof mainWindow !== "undefined") {
+                                    mainWindow.updateCellValue(row, col, value);
+                                }
+                            } else if (cell.text === "") {
+                                // Allow clearing the cell (set to 0)
+                                if (typeof mainWindow !== "undefined") {
+                                    mainWindow.updateCellValue(row, col, 0);
+                                }
+                            }
+                            cell.focus = false; // Remove focus after Enter
+                        }
+                        
+                        Keys.onReturnPressed: {
+                            handleEnterKey();
+                        }
+                        
+                        Keys.onEnterPressed: {
+                            // Handle Enter key (numpad)
+                            handleEnterKey();
+                        }
                     }
                 }
             }
